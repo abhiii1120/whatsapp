@@ -11,6 +11,6 @@ app.use(express.json());
 app.use(cookieParser());
 
 // --- use routes ---
-app.get('/api',indexRouter)
+app.use('/api',indexRouter)
 
 export default app;

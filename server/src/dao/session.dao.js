@@ -10,7 +10,7 @@ import userModel from "../models/user.model.js";
  * @returns {promise<object>} - the created session object.
  */
  export const createSession = async ({userId,refreshToken}) => {
-    const session = await userModel.create({userId,refreshToken})
+    const session = await sessionModel.create({userId,refreshToken})
 
     return session;
  }
@@ -21,7 +21,7 @@ import userModel from "../models/user.model.js";
  * @returns {Promise<Object|null>} - the retrieved session object or null if not found;
  */
  export const getSessionbyUserId = async (userId) => {
-    const session = await userModel.findOne({userId});
+    const session = await sessionModel.findOne({userId});
 
     return session;
  }

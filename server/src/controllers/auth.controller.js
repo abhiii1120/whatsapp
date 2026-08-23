@@ -21,6 +21,13 @@ export const registerUser = async (req, res) => {
 
   await sessionDao.createSession({ userId: user._id, refreshToken });
 
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
   return buildSuccessResponse(res, "User registered successfully", {
     user: {
       id: user._id,
