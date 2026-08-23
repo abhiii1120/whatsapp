@@ -1,0 +1,24 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    ports:
+      - 9000:27017
+    volumes:
+      - whatsapp_db:/data/db
+
+  backend:
+    build: ./backend
+    container_name: backend
+    ports:
+      - 3000:3000
+    depends_on:
+      - mongo
+    volumes:
+      - ./Backend:/app
+      - whatsapp_node_modules:/app/whatsapp_node_modules
+    command: "npm run dev"
+
+volumes:
+  whatsapp_db:
+  whatsapp_node_modules:
