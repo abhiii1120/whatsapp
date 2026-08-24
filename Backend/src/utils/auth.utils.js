@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import env from "../config/env.js";
+import { token } from "morgan";
 
 /**
  *
@@ -26,3 +27,25 @@ export const generateRefreshToken = (userId, id) => {
   });
   return refreshToken;
 };
+
+/**
+ * Verifies the provided JWT refresh Token
+ * @param {string} token - The jwt refresh token to verify. 
+ * @returns {Object} = the decoded payload of the verified token.
+ */
+export const verifyRefreshToken = (token) => {
+
+ const decoded = jwt.verify(token,env.JWT_REFRESH_TOKEN_SECRET);
+ console.log(decoded)
+ return decoded
+}
+
+/**
+ * Verifies the provided JWT access token.
+ * @param {string} token - The jwt access token to verify.
+ * @returns {Object} - the decoded payload of the verified token.
+ */
+export const verifyAccessToken = (token) => {
+  const decoded = jwt.verify(token,env.JWT_ACCESS_TOKEN_SECRET);
+  return decoded;
+}

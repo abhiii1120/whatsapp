@@ -35,8 +35,19 @@ export const updateSessionByUserId = async (userId, { refreshToken }) => {
   const session = await sessionModel.findOneAndUpdate(
     { userId },
     { refreshToken },
-    { new: true },
+    { new: true , upsert: true, setDefaultsOnInsert: true },
   );
 
-  return true;
+  return session;
 };
+
+/**
+ * Deletes a session by the provided userId.
+ * @param {string} userId - The ID of the user for whom to delete the session. 
+ * @returns {Promise<Object|null>} - the deleted session object or null if not found.
+ */
+export const deleteSessionByUserId = async (userId) => {
+  const session = await sessionModel.findOneAndDelete({userId});
+  console.log(session)
+  return session;
+}
