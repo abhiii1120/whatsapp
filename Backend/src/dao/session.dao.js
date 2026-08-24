@@ -1,6 +1,5 @@
- import sessionModel from "../models/session.model.js";
+import sessionModel from "../models/session.model.js";
 import userModel from "../models/user.model.js";
-
 
 /**
  * Creates a new session for a user with the provided userId and refreshToken.
@@ -9,19 +8,35 @@ import userModel from "../models/user.model.js";
  * @param {string} params.refreshToken - the refreshtoken associated with the session.
  * @returns {promise<object>} - the created session object.
  */
- export const createSession = async ({userId,refreshToken}) => {
-    const session = await sessionModel.create({userId,refreshToken})
+export const createSession = async ({ userId, refreshToken }) => {
+  const session = await sessionModel.create({ userId, refreshToken });
 
-    return session;
- }
+  return session;
+};
 
 /**
  * retrives the session by the provided userId.
  * @param {string} userId - id of the user for whom to retrieve the session.
  * @returns {Promise<Object|null>} - the retrieved session object or null if not found;
  */
- export const getSessionbyUserId = async (userId) => {
-    const session = await sessionModel.findOne({userId});
+export const getSessionbyUserId = async (userId) => {
+  const session = await sessionModel.findOne({ userId });
 
-    return session;
- }
+  return session;
+};
+
+/**
+ * update refresh token for a session by userid
+ * @param {string} userId - Id of the user for whom to update the session.
+ * @param {*} params.refreshToken - The new refresh token associated with the session. 
+ * @returns {Promise<Object|null>} - The updated session object or null if not found.
+ */
+export const updateSessionByUserId = async (userId, { refreshToken }) => {
+  const session = await sessionModel.findOneAndUpdate(
+    { userId },
+    { refreshToken },
+    { new: true },
+  );
+
+  return true;
+};
