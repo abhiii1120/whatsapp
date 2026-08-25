@@ -110,7 +110,7 @@ export const logoutUser = async (req, res) => {
       sameSite: "strict",
     });
 
-    return buildSuccessResponse(res,'Logged out successfully')
+    return buildSuccessResponse(res, "Logged out successfully");
   } catch (error) {
     return NotFound(res, "Invalid or expired refresh token");
   }
@@ -118,8 +118,8 @@ export const logoutUser = async (req, res) => {
 
 /**
  * Refreshes user's access token and refresh token and update session with new refresh token
- * @param {object} req - The request object 
- * @param {Object} res - The response object 
+ * @param {object} req - The request object
+ * @param {Object} res - The response object
  * @returns {Promise<void>} - A promise that resolves when user's gets new refresh token and new session.
  */
 export const refreshTokenController = async (req, res) => {
@@ -162,4 +162,28 @@ export const refreshTokenController = async (req, res) => {
       accessToken: newAccessToken,
     });
   } catch (error) {}
+};
+
+/**
+ * function for get me
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {Promise<void>} - A promise that resolves when the user data is retrieved.
+ */
+export const getMe = async (req, res) => {
+  const userId = req.userId;
+
+  const user = await userDao.getUserById(userId);
+
+  if (!user) {
+    return NotFound("User not found");
+  }
+
+  return buildSuccessResponse(res, "User data retrieved successfully", {
+    user: {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+    },
+  });
 };
