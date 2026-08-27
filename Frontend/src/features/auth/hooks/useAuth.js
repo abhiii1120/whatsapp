@@ -55,8 +55,10 @@ const useAuth = () => {
    */
   const handleGetCurrentUser = async () => {
     try {
+          dispatch(setLoading(true));
       const data = await getCurrentUser();
       dispatch(setUser(data.user))
+      console.log(data)
     } catch (error) {
       console.error("error while fetching current user:", error);
     }

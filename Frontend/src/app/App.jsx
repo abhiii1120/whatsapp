@@ -8,7 +8,7 @@ function Main() {
 
   useEffect(() => {
     handleGetCurrentUser();
-  }, []);
+  }, [handleGetCurrentUser]);
 
   return <AppRoutes />;
 }
