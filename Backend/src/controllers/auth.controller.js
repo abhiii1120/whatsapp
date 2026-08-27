@@ -3,6 +3,7 @@ import * as authUtils from "../utils/auth.utils.js";
 import * as sessionDao from "../dao/session.dao.js";
 import buildSuccessResponse from "../utils/buildSuccessResponse.js";
 import NotFound from "../utils/errors/NotFound.js";
+import { getRedisClient } from "../config/cache.js";
 
 /**
  * Registers a new user with the provided username,email and password.
@@ -188,21 +189,41 @@ export const getMe = async (req, res) => {
   });
 };
 
+export const getCurrentUser = async (req, res) => {
+  const redisClient = getRedisClient();
 
-export const getCurrentUser = async (req,res) => {
   const userId = req.userId;
+
+  const isUserInCache = await redisClient.get(`user:${userId}`);
+
+  if (isUserInCache) {
+    const user = JSON.parse(isUserInCache);
+    return buildSuccessResponse(
+      res,
+      "Current data retrieved successfully (from cache)",
+      {
+        user: {
+          id: user._id,
+          username: user.username,
+          email: user.email,
+        },
+      },
+    );
+  }
 
   const user = await userDao.getUserById(userId);
 
-  if(!user){
+  if (!user) {
     return NotFound("User not found");
   }
 
-   return buildSuccessResponse(res, "User data retrieved successfully", {
+  await redisClient.set(`user:${userId}`, JSON.stringify(user), "EX", 900);
+
+  return buildSuccessResponse(res, "User data retrieved successfully", {
     user: {
       id: user._id,
       username: user.username,
       email: user.email,
     },
   });
-}
+};
