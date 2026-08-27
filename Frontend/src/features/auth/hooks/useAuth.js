@@ -4,10 +4,10 @@ import {
   setError,
   setLoading,
 } from "../state/auth.slice";
-import { registerUser } from "../services/auth.api";
+import { loginUser, registerUser } from "../services/auth.api";
 import { useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
-import {useNavigate} from "react-router"
+import { useNavigate } from "react-router";
 
 const useAuth = () => {
   const dispatch = useDispatch();
@@ -16,13 +16,19 @@ const useAuth = () => {
     register,
     handleSubmit,
     formState: { errors },
-    watch
+    watch,
   } = useForm();
 
   const onRegisterSubmit = async (payload) => {
     const data = await registerUser(payload);
-    dispatch(setUser(data.user));
-    dispatch(setAccessToken(data.accessToken));
+    dispatch(setUser(data.data.user));
+    dispatch(setAccessToken(data.data.accessToken));
+  };
+
+  const onLoginSubmit = async (payload) => {
+    const data = await loginUser(payload);
+    dispatch(setUser(data.data.user));
+    dispatch(setAccessToken(data.data.accessToken));
   };
 
   return {
@@ -31,7 +37,8 @@ const useAuth = () => {
     handleSubmit,
     navigate,
     errors,
-    watch
+    watch,
+    onLoginSubmit
   };
 };
 
