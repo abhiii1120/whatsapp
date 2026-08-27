@@ -6,10 +6,8 @@ import Button from "../../../components/Button";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-
 const Login = () => {
-  const { errors, handleSubmit, navigate, onRegisterSubmit, register } =
-    useAuth();
+  const { errors, handleSubmit, navigate, onLoginSubmit, register } = useAuth();
   return (
     <AuthLayout
       eyebrow="Welcome back"
@@ -17,7 +15,7 @@ const Login = () => {
       subtitle="Enter your details to pick up where you left off."
     >
       <form
-        onSubmit={handleSubmit(onRegisterSubmit)}
+        onSubmit={handleSubmit(onLoginSubmit)}
         className="space-y-5"
         noValidate
       >
@@ -53,15 +51,13 @@ const Login = () => {
           </div>
         </div>
 
-        <Button type="submit">
-          Log in
-        </Button>
+        <Button type="submit">Log in</Button>
 
         <p className="text-center text-[14px] text-stone-500">
           New here?{" "}
           <button
             type="button"
-            onClick={() => navigate('/')}
+            onClick={() => navigate("/")}
             className="font-semibold text-emerald-700 hover:text-emerald-900"
           >
             Create an account
