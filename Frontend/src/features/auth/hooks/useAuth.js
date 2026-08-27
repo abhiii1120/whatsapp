@@ -7,11 +7,9 @@ import {
 import { getCurrentUser, loginUser, registerUser } from "../services/auth.api";
 import { useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router";
 
 const useAuth = () => {
   const dispatch = useDispatch();
-  let navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -62,13 +60,15 @@ const useAuth = () => {
     } catch (error) {
       console.error("error while fetching current user:", error);
     }
+    finally{
+      dispatch(setLoading(false));
+    }
   };
 
   return {
     register,
     onRegisterSubmit,
     handleSubmit,
-    navigate,
     errors,
     watch,
     onLoginSubmit,

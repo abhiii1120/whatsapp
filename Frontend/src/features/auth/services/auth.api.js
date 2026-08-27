@@ -29,6 +29,6 @@ export const loginUser = async (payload) => {
  * @returns {Promise<Object>} A promise that resolve to the response data from the server.
  */
 export const getCurrentUser = async () => {
-    const res = await authApi.get('/current-user',payload);
+    const res = await authApi.get('/current-user');
     return res.data.data;
 }
