@@ -3,7 +3,7 @@ import AuthLayout from "../component/AuthLayout";
 import Input from "../../../components/Input";
 import useAuth from "../hooks/useAuth";
 import Button from "../../../components/Button";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -72,13 +72,12 @@ const Register = () => {
 
         <p className="text-center text-[14px] text-stone-500">
           Already have an account?{" "}
-          <button
-            type="button"
-            onClick={() => useNavigate("/login")}
+          <Link
+            to={'/login'}
             className="font-semibold text-emerald-700 hover:text-emerald-900"
           >
             Log in
-          </button>
+          </Link>
         </p>
       </form>
     </AuthLayout>
