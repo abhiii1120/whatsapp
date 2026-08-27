@@ -187,3 +187,22 @@ export const getMe = async (req, res) => {
     },
   });
 };
+
+
+export const getCurrentUser = async (req,res) => {
+  const userId = req.userId;
+
+  const user = await userDao.getUserById(userId);
+
+  if(!user){
+    return NotFound("User not found");
+  }
+
+   return buildSuccessResponse(res, "User data retrieved successfully", {
+    user: {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+    },
+  });
+}

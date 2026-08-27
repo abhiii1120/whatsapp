@@ -57,7 +57,7 @@ const Login = () => {
           New here?{" "}
           <button
             type="button"
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/register")}
             className="font-semibold text-emerald-700 hover:text-emerald-900"
           >
             Create an account
