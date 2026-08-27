@@ -3,11 +3,12 @@ import AuthLayout from "../component/AuthLayout";
 import Input from "../../../components/Input";
 import useAuth from "../hooks/useAuth";
 import Button from "../../../components/Button";
+import { useNavigate } from "react-router";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const Register = () => {
-  const { errors, handleSubmit, navigate, onRegisterSubmit, register,watch } =
+  const { errors, handleSubmit, onRegisterSubmit, register,watch } =
     useAuth();
   const password = watch("password");
 
@@ -73,7 +74,7 @@ const Register = () => {
           Already have an account?{" "}
           <button
             type="button"
-            onClick={() => navigate("/login")}
+            onClick={() => useNavigate("/login")}
             className="font-semibold text-emerald-700 hover:text-emerald-900"
           >
             Log in

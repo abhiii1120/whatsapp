@@ -3,11 +3,11 @@ import AuthLayout from "../component/AuthLayout";
 import Input from "../../../components/Input";
 import useAuth from "../hooks/useAuth";
 import Button from "../../../components/Button";
-
+import { useNavigate } from "react-router";
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const Login = () => {
-  const { errors, handleSubmit, navigate, onLoginSubmit, register } = useAuth();
+  const { errors, handleSubmit, onLoginSubmit, register } = useAuth();
   return (
     <AuthLayout
       eyebrow="Welcome back"
@@ -57,7 +57,7 @@ const Login = () => {
           New here?{" "}
           <button
             type="button"
-            onClick={() => navigate("/register")}
+            onClick={() => useNavigate("/register")}
             className="font-semibold text-emerald-700 hover:text-emerald-900"
           >
             Create an account
