@@ -1,6 +1,7 @@
 import { Server } from "socket.io";
 import logger from "../config/logger.js";
 import { verifyAccessToken } from "../utils/auth.utils.js";
+import * as ConversationDao from "../dao/conversion.dao.js";
 
 export function initializeSocketServer(httpServer) {
   const io = new Server(httpServer);
@@ -27,10 +28,17 @@ export function initializeSocketServer(httpServer) {
     // make user join a room with their userId so we can send messages to them specifically
     socket.join(socket.userId)
 
-    socket.on("sendMessage",(data) => {
+    socket.on("sendMessage", async (data) => {
 
+      //if data comes in string then we will convert it into json format
       if(typeof data === "string"){
         data = JSON.parse(data);
+      }
+
+      const isConversationExists = await ConversationDao.getConversationByParticipants([socket.userId , data["receiver"]]);
+
+      if(!isConversationExists){
+        await ConversationDao.createConversation([socket.userId,data["receiver"]])
       }
 
       const receiver = data.receiver
