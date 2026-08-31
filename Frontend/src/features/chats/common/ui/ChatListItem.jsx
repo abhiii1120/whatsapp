@@ -16,18 +16,32 @@ export default function ChatListItem({ chat, selected, onClick }) {
           <LayoutGrid size={18} className="text-sky-400" />
         </div>
       ) : (
-        <Avatar src={chat.avatar} alt={chat.name} online={chat.online} />
+        <Avatar
+          src={chat.avatar}
+          alt={chat.username}
+          name={chat.username}
+          online={chat.online}
+        />
       )}
-      <div className="min-w-0 flex-1">
-        <div className="flex items-baseline justify-between gap-2">
-          <span className="text-sm font-medium text-gray-100 truncate">
-            {chat.name}
-          </span>
-          <span className="text-[11px] text-gray-500 shrink-0">
-            {chat.time}
-          </span>
+      <div className="min-w-0 flex-1 ">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-sm font-medium text-gray-100 truncate">
+              {chat.username}
+            </span>
+            {chat.isNew && (
+              <span className="text-[9px] font-semibold text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded-full shrink-0">
+                NEW
+              </span>
+            )}
+          </div>
+          {chat.time && (
+            <span className="text-[11px] text-gray-500 shrink-0">
+              {chat.time}
+            </span>
+          )}
         </div>
-        <p className="text-xs text-gray-500 truncate mt-0.5">{chat.preview}</p>
+        <p className="text-xs text-gray-500 truncate mt-0.5">{chat.email}</p>
       </div>
     </button>
   );
