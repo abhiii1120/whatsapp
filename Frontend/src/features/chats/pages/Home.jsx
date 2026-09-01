@@ -18,74 +18,56 @@ import { useSelector } from "react-redux";
 import useChat from "../hooks/useChat";
 import EmptyState from "../common/ui/EmptyState";
 
-const chats = [
-  {
-    id: 1,
-    name: "Sarah Jenkins",
-    avatar: "https://i.pravatar.cc/100?img=47",
-    preview: "The quarterly report looks solid. Let's review...",
-    time: "10:42 AM",
-    active: true,
-    online: true,
-  },
-  {
-    id: 2,
-    name: "Design Team",
-    avatar: "https://i.pravatar.cc/100?img=12",
-    preview: "New mockups for the dashboard are re...",
-    time: "09:15 AM",
-    active: false,
-    online: true,
-    isGroup: true,
-  },
-  {
-    id: 3,
-    name: "Project Alpha",
-    avatar: null,
-    preview: "Deployment successful across all regions.",
-    time: "Yesterday",
-    active: false,
-    online: false,
-    isSystem: true,
-  },
-];
+// Helper: normalize id across search results (_id) and conversation objects (id)
+const getChatId = (chat) => chat?._id || chat?.id;
 
-const messages = [
+
+
+export default function ChatDashboard() {
+  const currentUser = useSelector((state) => state.auth.user);
+  const searchUserResult = useSelector((state) => state.chat.searchUserResult);
+  const conversations = useSelector((state) => state.chat.conversations);
+  const activeConversation = useSelector(
+    (state) => state.chat.activeConversation,
+  );
+
+  const {
+    handleSearchUser,
+    handleAppendConversation,
+    handleSetActiveConversation,
+    createSocketConnection,
+  } = useChat();
+
+  const [showChatOnMobile, setShowChatOnMobile] = useState(false);
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState([
   {
-    id: 1,
     fromMe: false,
     text: "Hey, are we still on for the review meeting this afternoon?",
     time: "10:30 AM",
   },
   {
-    id: 2,
     fromMe: false,
     text: "I've got the updated metrics ready.",
     time: "10:31 AM",
   },
   {
-    id: 3,
     fromMe: true,
     text: "Yes, absolutely. Let's aim for 2 PM.",
     time: "10:35 AM",
   },
   {
-    id: 4,
     fromMe: true,
     text: "Could you send over the raw data beforehand? I want to take a quick look before we jump on the call.",
     time: "10:36 AM",
   },
-];
+]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
 
-export default function ChatDashboard() {
-  const [activeChat, setActiveChat] = useState(null); // the clicked chat object itself, or null
-  const [showChatOnMobile, setShowChatOnMobile] = useState(false);
-  const [message, setMessage] = useState("");
-  const currentUser = useSelector((state) => state.auth.user);
-  const searchUserResult = useSelector((state) => state.chat.searchUserResult);
-  const { handleSearchUser } = useChat();
-  let [searchQuery, setSearchQuery] = useState("");
-  let [isSearching, setIsSearching] = useState(false);
+  useEffect(() => {
+    createSocketConnection();
+  }, []);
 
   useEffect(() => {
     if (!searchQuery.trim()) return;
@@ -102,15 +84,51 @@ export default function ChatDashboard() {
     return () => clearTimeout(delayDebounce);
   }, [searchQuery, currentUser]);
 
+  const activeChat =
+    conversations.find((c) => getChatId(c) === activeConversation) || null;
+
+  const listToShow = searchQuery.trim() ? searchUserResult : conversations;
+
   const openChat = (chat) => {
-    setActiveChat(chat);
+    const conversationId = getChatId(chat);
+    const exists = conversations.some((c) => getChatId(c) === conversationId);
+
+    if (!exists) {
+      const newConv = {
+        id: conversationId,
+        username: chat.username,
+        email: chat.email,
+        avatar: chat.avatar,
+        lastMessage: "Tap to start talking",
+        timeStamp: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        unread: false,
+      };
+      handleAppendConversation(newConv);
+    }
+
+    handleSetActiveConversation(conversationId);
     setShowChatOnMobile(true);
+    setSearchQuery("");
+  };
+
+  const handleSendMessage = (e) => {
+    let messageObj = {
+      fromMe: true,
+      text: message,
+      time: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+    setMessages([...messages,messageObj])
+    setMessage('')
   };
 
   const closeChat = () => {
     setShowChatOnMobile(false);
-    // if you want mobile "back" to fully deselect too, uncomment:
-    // setActiveChat(null);
   };
 
   return (
@@ -145,11 +163,11 @@ export default function ChatDashboard() {
           </div>
 
           <div className="flex-1 min-h-0 overflow-y-auto">
-            {searchUserResult.map((chat) => (
+            {listToShow.map((chat) => (
               <ChatListItem
-                key={chat._id}
+                key={getChatId(chat)}
                 chat={chat}
-                selected={activeChat?._id === chat._id}
+                selected={getChatId(chat) === activeConversation}
                 onClick={() => openChat(chat)}
               />
             ))}
@@ -169,7 +187,10 @@ export default function ChatDashboard() {
               {/* Chat header */}
               <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-white/5 shrink-0">
                 <div className="flex items-center gap-3 min-w-0">
-                  <button onClick={closeChat} className="md:hidden text-gray-400 mr-1">
+                  <button
+                    onClick={closeChat}
+                    className="md:hidden text-gray-400 mr-1"
+                  >
                     ←
                   </button>
                   <Avatar
@@ -186,10 +207,22 @@ export default function ChatDashboard() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 sm:gap-5 text-gray-400 shrink-0">
-                  <Video size={17} className="cursor-pointer hover:text-gray-200" />
-                  <Phone size={16} className="cursor-pointer hover:text-gray-200" />
-                  <Search size={16} className="cursor-pointer hover:text-gray-200 hidden sm:block" />
-                  <MoreVertical size={16} className="cursor-pointer hover:text-gray-200" />
+                  <Video
+                    size={17}
+                    className="cursor-pointer hover:text-gray-200"
+                  />
+                  <Phone
+                    size={16}
+                    className="cursor-pointer hover:text-gray-200"
+                  />
+                  <Search
+                    size={16}
+                    className="cursor-pointer hover:text-gray-200 hidden sm:block"
+                  />
+                  <MoreVertical
+                    size={16}
+                    className="cursor-pointer hover:text-gray-200"
+                  />
                 </div>
               </div>
 
@@ -200,10 +233,10 @@ export default function ChatDashboard() {
                     Today
                   </span>
                 </div>
-                {messages.map((m) => (
-                  <MessageBubble key={m.id} msg={m} />
+                {messages.map((m, i) => (
+                  <MessageBubble key={i} msg={m} />
                 ))}
-                <FileAttachment />
+                {/* <FileAttachment /> */}
               </div>
 
               {/* Input */}
@@ -219,10 +252,18 @@ export default function ChatDashboard() {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     type="text"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handleSendMessage();
+                      }
+                    }}
                     placeholder="Type a message..."
                     className="bg-transparent text-sm text-gray-200 placeholder:text-gray-500 outline-none w-full"
                   />
-                  <Paperclip size={16} className="text-gray-500 shrink-0 ml-2" />
+                  <Paperclip
+                    size={16}
+                    className="text-gray-500 shrink-0 ml-2"
+                  />
                 </div>
                 <button className="w-10 h-10 rounded-full bg-emerald-600 hover:bg-emerald-500 flex items-center justify-center shrink-0">
                   <Mic size={17} className="text-white" />
