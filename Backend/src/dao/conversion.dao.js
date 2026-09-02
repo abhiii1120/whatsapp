@@ -26,9 +26,11 @@ export async function getConversationById(conversationId) {
  * @returns {Promise<Array>} - A promise that resolves to an array of conversation objects.
  */
 export async function getConversationByUserId(userId) {
-  const conversations = await conversationModel.find({
-    participants: { $in: [userId] },
-  });
+  const conversations = await conversationModel
+    .find({
+      participants: { $in: [userId] },
+    })
+    .populate("participants", "username email");
   return conversations;
 }
 
@@ -37,7 +39,11 @@ export async function getConversationByUserId(userId) {
  * @param {Array} participants - An array of participant IDs to match in the conversation.
  * @returns {Promise<Object|null>} - A promise that resolves to the conversation object if found, or null if not found.
  */
-export async function getConversationByParticipants(participants = [/* id(userId1),id(userId2) */]) {
+export async function getConversationByParticipants(
+  participants = [
+    /* id(userId1),id(userId2) */
+  ],
+) {
   const conversation = await conversationModel.findOne({
     participants: { $all: participants },
   });

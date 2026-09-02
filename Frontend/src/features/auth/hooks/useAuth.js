@@ -44,6 +44,7 @@ const useAuth = () => {
 
       dispatch(setUser(data.user));
       dispatch(setAccessToken(data.accessToken));
+      
     } catch (error) {
       console.error("error while log in user", error);
     }
