@@ -38,6 +38,7 @@ export default function ChatDashboard() {
     handleCreateConversation,
     handleGetMyConversation,
     handleSendChatMessage,
+    setupSocket
   } = useChat();
 
   const [showChatOnMobile, setShowChatOnMobile] = useState(false);
@@ -46,6 +47,7 @@ export default function ChatDashboard() {
   const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
+    setupSocket()
     createSocketConnection();
     handleGetMyConversation();
   }, []);
@@ -238,7 +240,7 @@ export default function ChatDashboard() {
                   </span>
                 </div>
                 {messages.map((m, i) => (
-                  <MessageBubble key={i} msg={m} />
+                  <MessageBubble key={i} msg={m} isMe={m.senderId === (currentUser._id || currentUser.id)} />
                 ))}
               </div>
 

@@ -18,6 +18,9 @@ export const emitEvent = (eventName, payload) => {
     if (!socket) {
         throw new Error("Socket is not initialized. Please create it first.")
     }
-
     socket.emit(eventName, payload)
+}
+
+export const addListener = (eventName,callback) => {
+    socket.on(eventName,callback);
 }
