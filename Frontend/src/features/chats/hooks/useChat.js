@@ -5,6 +5,7 @@ import {
   appendConversation,
   setActiveConversation,
   setConversations,
+  appendMessage,
 } from "../state/chat.slice";
 import {
   createSocketConnection,
@@ -21,7 +22,7 @@ const useChat = () => {
       dispatch(setSearchUserResult(users));
     } catch (error) {
       console.error("Error searching users:", error);
-      return [];
+      dispatch(setSearchUserResult([])); 
     }
   };
 
@@ -37,8 +38,9 @@ const useChat = () => {
     dispatch(appendConversation(conversation));
   };
 
-  const handleSendChatConversation = (message) => {
+  const handleSendChatMessage = (message,conversationId) => {
     emitEvent("sendMessage", message);
+    dispatch(appendMessage({conversationId,message}))
   };
 
   const handleCreateConversation = async (recipientId) => {
@@ -54,12 +56,24 @@ const useChat = () => {
   const handleGetMyConversation = async () => {
     try {
       const conversations = await getMyConversations();
-      console.log(conversations)
       dispatch(setConversations(conversations));
     } catch (error) {
       console.error("Error getting conversation:", error);
       dispatch(setConversations([]));
     }
+  };
+
+  const handleGetMessages = async () => {
+    const messages = await getMessages();
+    dispatch(setMessages(messages));
+  };
+
+  // added — wraps createSocketConnection + the receiveMessage listener in one call
+  const setupSocket = () => {
+    createSocketConnection();
+    addListener("receiveMessage", (message) => {
+      dispatch(appendMessage({ conversationId: message.conversationId, message }));
+    });
   };
 
   return {
@@ -69,9 +83,11 @@ const useChat = () => {
     handleSetConversations,
     createSocketConnection,
     createSocketConnection,
-    handleSendChatConversation,
     handleCreateConversation,
     handleGetMyConversation,
+    handleSendChatMessage,
+    handleGetMessages,
+    setupSocket
   };
 };
 

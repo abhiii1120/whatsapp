@@ -8,52 +8,68 @@ import NotFound from "../utils/errors/NotFound.js";
  * @route POST /api/chats/conversation
  * @access Private
  */
-export const createConversation = async (req,res) => {
-    const user = req.userId;
-    const {recipientId} = req.body;
+export const createConversation = async (req, res) => {
+  const user = req.userId;
+  console.log(req.body);
+  const { recipientId } = req.body;
 
-    if(!recipientId){
-        return NotFound(res,'Recipient ID is required');
-    }
+  if (!recipientId) {
+    return NotFound(res, "Recipient ID is required");
+  }
 
-    if(user.toString() === recipientId.toString()){
-        return NotFound(res,'You cannot create a conversation with yourself');
-    }
+  if (user.toString() === recipientId.toString()) {
+    return NotFound(res, "You cannot create a conversation with yourself");
+  }
 
-    const receiver = await UserDao.getUserById(recipientId);
+  const receiver = await UserDao.getUserById(recipientId);
 
-    if(!receiver){
-        return NotFound('Recipitant user not found');
-    }
+  if (!receiver) {
+    return NotFound(res, "Recipitant user not found");
+  }
 
-    const existingConversation = await conversationDao.getConversationByParticipants([user,recipientId]);
+  const existingConversation =
+    await conversationDao.getConversationByParticipants([user, recipientId]);
 
-    if(existingConversation){
-        return buildSuccessResponse(res,'Conversation already exists',{
-            conversation:existingConversation,
-        })
-    }
-}
+  if (existingConversation) {
+    return buildSuccessResponse(res, "Conversation already exists", {
+      conversation: existingConversation,
+    });
+  }
+
+  const conversation = await conversationDao.createConversation([
+    user,
+    recipientId,
+  ]);
+
+  return buildSuccessResponse(res, "Conversation created successfully", {
+    data: conversation,
+  });
+};
 
 /**
  * @desc Get all conversations for the authenticated user.
  * @route GET /api/chat/conversation
  * @access Private
  */
-export const getConversations = async (req,res) => {
-    const userId = req.userId;
+export const getConversations = async (req, res) => {
+  const userId = req.userId;
 
-    const conversations = (await conversationDao.getConversationByUserId(userId)).map((conversation) => {
-        const recipient = conversation.participants.find(participant => participant._id.toString() !== userId.toString());
-        return {
-            _id:conversation._id,
-            participants:conversation.participants,
-            username:recipient.username,
-            email:recipient.email
-        }
-    });
-    
-    return buildSuccessResponse(res,'Conversations retrieved successfully',{
-        conversations
-    })
-}
+  const conversations = (
+    await conversationDao.getConversationByUserId(userId)
+  ).map((conversation) => {
+    const recipient = conversation.participants.find(
+      (participant) => participant._id.toString() !== userId.toString(),
+    );
+    return {
+      _id: conversation._id,
+      participants: conversation.participants,
+      recipientId: recipient._id,
+      username: recipient.username,
+      email: recipient.email,
+    };
+  });
+
+  return buildSuccessResponse(res, "Conversations retrieved successfully", {
+    conversations,
+  });
+};
