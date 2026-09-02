@@ -12,3 +12,12 @@ export const createSocketConnection = () => {
     })
 
 }
+
+export const emitEvent = (eventName, payload) => {
+
+    if (!socket) {
+        throw new Error("Socket is not initialized. Please create it first.")
+    }
+
+    socket.emit(eventName, payload)
+}

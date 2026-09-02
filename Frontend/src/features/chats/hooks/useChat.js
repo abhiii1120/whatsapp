@@ -6,7 +6,11 @@ import {
   setActiveConversation,
   setConversations,
 } from "../state/chat.slice";
-import {createSocketConnection} from "../../shared/services/chat.socket";
+import {
+  createSocketConnection,
+  emitEvent,
+} from "../../shared/services/chat.socket";
+import { createConversation, getMyConversations } from "../services/chats.api";
 
 const useChat = () => {
   let dispatch = useDispatch();
@@ -31,7 +35,32 @@ const useChat = () => {
 
   const handleAppendConversation = (conversation) => {
     dispatch(appendConversation(conversation));
-  }
+  };
+
+  const handleSendChatConversation = (message) => {
+    emitEvent("sendMessage", message);
+  };
+
+  const handleCreateConversation = async (recipientId) => {
+    try {
+      const conversation = await createConversation(recipientId);
+      dispatch(appendConversation(conversation));
+      dispatch(setActiveConversation(conversation._id));
+    } catch (error) {
+      console.error("Error creating conversation:", error);
+    }
+  };
+
+  const handleGetMyConversation = async () => {
+    try {
+      const conversations = await getMyConversations();
+      console.log(conversations)
+      dispatch(setConversations(conversations));
+    } catch (error) {
+      console.error("Error getting conversation:", error);
+      dispatch(setConversations([]));
+    }
+  };
 
   return {
     handleSearchUser,
@@ -40,6 +69,9 @@ const useChat = () => {
     handleSetConversations,
     createSocketConnection,
     createSocketConnection,
+    handleSendChatConversation,
+    handleCreateConversation,
+    handleGetMyConversation,
   };
 };
 

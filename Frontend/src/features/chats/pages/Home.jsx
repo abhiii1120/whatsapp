@@ -21,8 +21,6 @@ import EmptyState from "../common/ui/EmptyState";
 // Helper: normalize id across search results (_id) and conversation objects (id)
 const getChatId = (chat) => chat?._id || chat?.id;
 
-
-
 export default function ChatDashboard() {
   const currentUser = useSelector((state) => state.auth.user);
   const searchUserResult = useSelector((state) => state.chat.searchUserResult);
@@ -36,37 +34,42 @@ export default function ChatDashboard() {
     handleAppendConversation,
     handleSetActiveConversation,
     createSocketConnection,
+    handleCreateConversation,
+    handleGetMyConversation,
+    handleSendChatConversation,
+    handleSetConversations,
   } = useChat();
 
   const [showChatOnMobile, setShowChatOnMobile] = useState(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([
-  {
-    fromMe: false,
-    text: "Hey, are we still on for the review meeting this afternoon?",
-    time: "10:30 AM",
-  },
-  {
-    fromMe: false,
-    text: "I've got the updated metrics ready.",
-    time: "10:31 AM",
-  },
-  {
-    fromMe: true,
-    text: "Yes, absolutely. Let's aim for 2 PM.",
-    time: "10:35 AM",
-  },
-  {
-    fromMe: true,
-    text: "Could you send over the raw data beforehand? I want to take a quick look before we jump on the call.",
-    time: "10:36 AM",
-  },
-]);
+    {
+      fromMe: false,
+      text: "Hey, are we still on for the review meeting this afternoon?",
+      time: "10:30 AM",
+    },
+    {
+      fromMe: false,
+      text: "I've got the updated metrics ready.",
+      time: "10:31 AM",
+    },
+    {
+      fromMe: true,
+      text: "Yes, absolutely. Let's aim for 2 PM.",
+      time: "10:35 AM",
+    },
+    {
+      fromMe: true,
+      text: "Could you send over the raw data beforehand? I want to take a quick look before we jump on the call.",
+      time: "10:36 AM",
+    },
+  ]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     createSocketConnection();
+    handleGetMyConversation();
   }, []);
 
   useEffect(() => {
@@ -123,8 +126,8 @@ export default function ChatDashboard() {
         minute: "2-digit",
       }),
     };
-    setMessages([...messages,messageObj])
-    setMessage('')
+    setMessages([...messages, messageObj]);
+    setMessage("");
   };
 
   const closeChat = () => {

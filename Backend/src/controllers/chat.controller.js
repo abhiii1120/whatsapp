@@ -44,7 +44,7 @@ export const getConversations = async (req,res) => {
     const userId = req.userId;
 
     const conversations = (await conversationDao.getConversationByUserId(userId)).map((conversation) => {
-        const recipient = conversation.participant.find(participant => participant._id.toString() !== userId.toString());
+        const recipient = conversation.participants.find(participant => participant._id.toString() !== userId.toString());
         return {
             _id:conversation._id,
             participants:conversation.participants,
