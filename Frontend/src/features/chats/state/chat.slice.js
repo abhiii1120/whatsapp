@@ -6,6 +6,7 @@ const chatSlice = createSlice({
         searchUserResult:[],
         conversations:[],
         activeConversation:null,
+        messages:{}
     },
     reducers:{
         setSearchUserResult:(state,action) => {
@@ -19,9 +20,19 @@ const chatSlice = createSlice({
         },
         appendConversation:(state,action) => {
             state.conversations.push(action.payload)
-        }
+        },
+        appendMessage:(state,action) => {
+            const {conversationId,message} = action.payload;
+            if(!state.messages[conversationId]) {
+                state.messages[conversationId] = []
+            }
+            state.messages[conversationId]?.push(message)
+        },
+         setMessages: (state, action) => {
+      state.messages = action.payload;
+    },
     }
 })
 
-export const {setSearchUserResult,appendConversation,setActiveConversation,setConversations} = chatSlice.actions
+export const {setSearchUserResult,appendConversation,setActiveConversation,setConversations,appendMessage,setMessages} = chatSlice.actions
 export default chatSlice.reducer

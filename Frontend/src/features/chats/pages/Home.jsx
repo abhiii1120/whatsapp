@@ -13,57 +13,35 @@ import ChatListItem from "../common/ui/ChatListItem";
 import SidebarNav from "../common/ui/SidebarNav";
 import Avatar from "../common/ui/Avatar";
 import MessageBubble from "../common/ui/MessageBubble";
-import FileAttachment from "../common/ui/FileAttachment";
 import { useSelector } from "react-redux";
 import useChat from "../hooks/useChat";
 import EmptyState from "../common/ui/EmptyState";
 
-// Helper: normalize id across search results (_id) and conversation objects (id)
 const getChatId = (chat) => chat?._id || chat?.id;
 
 export default function ChatDashboard() {
   const currentUser = useSelector((state) => state.auth.user);
   const searchUserResult = useSelector((state) => state.chat.searchUserResult);
   const conversations = useSelector((state) => state.chat.conversations);
+  const user = useSelector((state) => state.auth.user);
   const activeConversation = useSelector(
     (state) => state.chat.activeConversation,
   );
-
+  
+  const messages = useSelector(
+    (state) => state.chat.messages[activeConversation] || [],
+  );
   const {
     handleSearchUser,
-    handleAppendConversation,
     handleSetActiveConversation,
     createSocketConnection,
     handleCreateConversation,
     handleGetMyConversation,
-    handleSendChatConversation,
-    handleSetConversations,
+    handleSendChatMessage,
   } = useChat();
 
   const [showChatOnMobile, setShowChatOnMobile] = useState(false);
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState([
-    {
-      fromMe: false,
-      text: "Hey, are we still on for the review meeting this afternoon?",
-      time: "10:30 AM",
-    },
-    {
-      fromMe: false,
-      text: "I've got the updated metrics ready.",
-      time: "10:31 AM",
-    },
-    {
-      fromMe: true,
-      text: "Yes, absolutely. Let's aim for 2 PM.",
-      time: "10:35 AM",
-    },
-    {
-      fromMe: true,
-      text: "Could you send over the raw data beforehand? I want to take a quick look before we jump on the call.",
-      time: "10:36 AM",
-    },
-  ]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
 
@@ -89,50 +67,39 @@ export default function ChatDashboard() {
 
   const activeChat =
     conversations.find((c) => getChatId(c) === activeConversation) || null;
+  console.log(activeConversation, "activechat");
 
-  const listToShow = searchQuery.trim() ? searchUserResult : conversations;
-
-  const openChat = (chat) => {
-    const conversationId = getChatId(chat);
-    const exists = conversations.some((c) => getChatId(c) === conversationId);
-
-    if (!exists) {
-      const newConv = {
-        id: conversationId,
-        username: chat.username,
-        email: chat.email,
-        avatar: chat.avatar,
-        lastMessage: "Tap to start talking",
-        timeStamp: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        unread: false,
-      };
-      handleAppendConversation(newConv);
+  const handleSelectSearchResult = async (user) => {
+    console.log(currentUser);
+    if (user._id === currentUser.id) {
+      return;
     }
-
-    handleSetActiveConversation(conversationId);
+    await handleCreateConversation(user._id);
     setShowChatOnMobile(true);
     setSearchQuery("");
   };
 
+  const handleOpenConversation = (conv) => {
+    handleSetActiveConversation(conv._id);
+    setShowChatOnMobile(true);
+  };
+
   const handleSendMessage = (e) => {
     let messageObj = {
-      fromMe: true,
-      text: message,
-      time: new Date().toLocaleTimeString([], {
+      id: Date.now(),
+      senderId: user.id || user.id,
+      receiver: activeChat?.recipientId,
+      content: message,
+      timestamp: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       }),
     };
-    setMessages([...messages, messageObj]);
     setMessage("");
+    handleSendChatMessage(messageObj, activeConversation);
   };
 
-  const closeChat = () => {
-    setShowChatOnMobile(false);
-  };
+  const closeChat = () => setShowChatOnMobile(false);
 
   return (
     <div className="h-screen w-full bg-[#111318] text-gray-100 flex flex-col overflow-hidden font-sans">
@@ -165,21 +132,57 @@ export default function ChatDashboard() {
             </div>
           </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto">
-            {listToShow.map((chat) => (
-              <ChatListItem
-                key={getChatId(chat)}
-                chat={chat}
-                selected={getChatId(chat) === activeConversation}
-                onClick={() => openChat(chat)}
-              />
-            ))}
+          <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-white/5">
+            {/* Search results — only when searching */}
+            {searchQuery.trim() !== "" && (
+              <div>
+                <div className="px-4 py-2 bg-white/5 text-[10px] uppercase font-bold tracking-wider text-gray-500">
+                  {isSearching ? "Searching..." : "Users"}
+                </div>
+                {searchUserResult.length === 0 && !isSearching && (
+                  <div className="px-4 py-4 text-xs text-gray-500 italic">
+                    No users match "{searchQuery}"
+                  </div>
+                )}
+                {searchUserResult.map((user) => (
+                  <ChatListItem
+                    key={user._id}
+                    chat={user}
+                    selected={false}
+                    onClick={() => handleSelectSearchResult(user)}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Existing conversations */}
+            <div>
+              {searchQuery.trim() !== "" && (
+                <div className="px-4 py-2 bg-white/5 text-[10px] uppercase font-bold tracking-wider text-gray-500">
+                  Conversations
+                </div>
+              )}
+              {conversations.length === 0 ? (
+                <div className="px-4 py-8 text-center text-gray-500 text-sm">
+                  No conversations yet.
+                </div>
+              ) : (
+                conversations.map((conv) => (
+                  <ChatListItem
+                    key={conv._id}
+                    chat={conv}
+                    selected={conv._id === activeConversation}
+                    onClick={() => handleOpenConversation(conv)}
+                  />
+                ))
+              )}
+            </div>
           </div>
 
           <SidebarNav />
         </aside>
 
-        {/* Chat panel */}
+        {/* Chat panel — unchanged below */}
         <section
           className={`flex-1 min-w-0 flex-col bg-[#15171d] ${
             showChatOnMobile ? "flex" : "hidden md:flex"
@@ -187,7 +190,6 @@ export default function ChatDashboard() {
         >
           {activeChat ? (
             <>
-              {/* Chat header */}
               <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-white/5 shrink-0">
                 <div className="flex items-center gap-3 min-w-0">
                   <button
@@ -229,7 +231,6 @@ export default function ChatDashboard() {
                 </div>
               </div>
 
-              {/* Messages */}
               <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-3">
                 <div className="flex justify-center">
                   <span className="text-[11px] text-gray-500 bg-white/5 px-3 py-1 rounded-full">
@@ -239,10 +240,8 @@ export default function ChatDashboard() {
                 {messages.map((m, i) => (
                   <MessageBubble key={i} msg={m} />
                 ))}
-                {/* <FileAttachment /> */}
               </div>
 
-              {/* Input */}
               <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3 border-t border-white/5 shrink-0">
                 <button className="text-gray-400 hover:text-gray-200 shrink-0">
                   <Plus size={20} />
@@ -256,9 +255,7 @@ export default function ChatDashboard() {
                     onChange={(e) => setMessage(e.target.value)}
                     type="text"
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleSendMessage();
-                      }
+                      if (e.key === "Enter") handleSendMessage();
                     }}
                     placeholder="Type a message..."
                     className="bg-transparent text-sm text-gray-200 placeholder:text-gray-500 outline-none w-full"

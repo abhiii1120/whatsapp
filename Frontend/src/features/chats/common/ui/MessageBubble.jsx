@@ -1,4 +1,5 @@
 export default function MessageBubble({ msg }) {
+  console.log(msg)
   return (
     <div className={`flex ${msg.fromMe ? "justify-end" : "justify-start"}`}>
       <div
@@ -8,14 +9,14 @@ export default function MessageBubble({ msg }) {
             : "bg-[#1c1f26] text-gray-100 rounded-bl-sm"
         }`}
       >
-        <p>{msg.text}</p>
+        <p>{msg.content}</p>
         <div
           className={`text-[10px] mt-1 flex items-center gap-1 justify-end ${
             msg.fromMe ? "text-emerald-100/70" : "text-gray-500"
           }`}
         >
-          {msg.time}
-          {msg.fromMe && <span>✓✓</span>}
+          {msg.timestamp}
+          {/* {msg.fromMe && <span>✓✓</span>} */}
         </div>
       </div>
     </div>

@@ -7,8 +7,10 @@ import globalApi from "../../shared/global.api";
  */
 export const createConversation = async (recipientId) => {
   try {
+    console.log(recipientId,'receipant id')
     const response = await globalApi.post("/chats/conversation", { recipientId });
     return response.data.data;
+    console.log(response)
   } catch (error) {
     console.error(error);
   }
