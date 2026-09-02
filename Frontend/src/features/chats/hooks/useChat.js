@@ -8,6 +8,7 @@ import {
   appendMessage,
 } from "../state/chat.slice";
 import {
+  addListener,
   createSocketConnection,
   emitEvent,
 } from "../../shared/services/chat.socket";
@@ -68,7 +69,6 @@ const useChat = () => {
     dispatch(setMessages(messages));
   };
 
-  // added — wraps createSocketConnection + the receiveMessage listener in one call
   const setupSocket = () => {
     createSocketConnection();
     addListener("receiveMessage", (message) => {
