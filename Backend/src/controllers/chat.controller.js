@@ -34,3 +34,26 @@ export const createConversation = async (req,res) => {
         })
     }
 }
+
+/**
+ * @desc Get all conversations for the authenticated user.
+ * @route GET /api/chat/conversation
+ * @access Private
+ */
+export const getConversations = async (req,res) => {
+    const userId = req.userId;
+
+    const conversations = (await conversationDao.getConversationByUserId(userId)).map((conversation) => {
+        const recipient = conversation.participants.find(participant => participant._id.toString() !== userId.toString());
+        return {
+            _id:conversation._id,
+            participants:conversation.participants,
+            username:recipient.username,
+            email:recipient.email
+        }
+    });
+    
+    return buildSuccessResponse(res,'Conversations retrieved successfully',{
+        conversations
+    })
+}
