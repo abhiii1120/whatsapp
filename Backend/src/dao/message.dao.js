@@ -19,6 +19,6 @@ export async function createMessage(messageData){
  * @returns {Promise<Array>} - A promise that resolves to an array of message objects.
  */
 export async function getMessagesByConversationId(conversationId) {
-    const messages = (await messageModel.find({conversationId})).toSorted({createdat:1});
+    const messages = await messageModel.find({ conversationId }).sort({ createdAt: 1 })
     return messages
 }

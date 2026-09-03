@@ -7,6 +7,6 @@ const chatRouter = Router();
 chatRouter.post('/conversation',authUser,createConversation)
 chatRouter.get('/conversation',authUser,getConversations)
 
-chatRouter.get("/messages/:conversationId",authUser, getMessages)
+chatRouter.get("/messages",authUser, getMessages)
 
 export default chatRouter;

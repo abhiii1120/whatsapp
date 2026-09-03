@@ -87,12 +87,12 @@ export const getMessages = async (req,res) => {
     }
   }))
 
-  const messages = conversationMessages.reduce((acc,curr,index,conversationMessages, {}) => {
+  const messages = conversationMessages.reduce((acc,curr) => {
     acc[curr.conversationId] = curr.messages;
     return acc;
-  })
+  },{})
 
   return buildSuccessResponse(res,"Messages retrieved successfully",{
-    data:messages
+    messages
   })
 }

@@ -29,3 +29,13 @@ export const getMyConversations = async () => {
     return null;
   }
 }
+
+/**
+ * Get all messages of all conversations of loggedInUser
+ * @returns {Promsie<Object>} - { messages: {}, }
+ */
+export const getMessages = async () => {
+
+  const response = await globalApi.get("/chats/messages")
+  return response.data.data.messages;
+}

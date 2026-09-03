@@ -6,13 +6,14 @@ import {
   setActiveConversation,
   setConversations,
   appendMessage,
+  setMessages,
 } from "../state/chat.slice";
 import {
   addListener,
   createSocketConnection,
   emitEvent,
 } from "../../shared/services/chat.socket";
-import { createConversation, getMyConversations } from "../services/chats.api";
+import { createConversation, getMessages, getMyConversations, } from "../services/chats.api";
 
 const useChat = () => {
   let dispatch = useDispatch();
@@ -64,10 +65,11 @@ const useChat = () => {
     }
   };
 
-  const handleGetMessages = async () => {
-    const messages = await getMessages();
-    dispatch(setMessages(messages));
-  };
+const handleGetMessages = async () => {
+  const messages = await getMessages();
+  console.log("messages map:", messages); // should show { convId: [...], convId: [...] } directly, no `.data` or `.message` wrapper
+  dispatch(setMessages(messages));
+};
 
   const setupSocket = () => {
     createSocketConnection();
@@ -75,6 +77,7 @@ const useChat = () => {
       dispatch(appendMessage({ conversationId: message.conversationId, message }));
     });
   };
+
 
   return {
     handleSearchUser,

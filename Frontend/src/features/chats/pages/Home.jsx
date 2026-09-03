@@ -38,7 +38,8 @@ export default function ChatDashboard() {
     handleCreateConversation,
     handleGetMyConversation,
     handleSendChatMessage,
-    setupSocket
+    setupSocket,
+    handleGetMessages,
   } = useChat();
 
   const [showChatOnMobile, setShowChatOnMobile] = useState(false);
@@ -48,8 +49,8 @@ export default function ChatDashboard() {
 
   useEffect(() => {
     setupSocket()
-    createSocketConnection();
     handleGetMyConversation();
+    handleGetMessages()
   }, []);
 
   useEffect(() => {
