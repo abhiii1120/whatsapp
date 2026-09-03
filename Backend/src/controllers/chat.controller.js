@@ -1,5 +1,6 @@
 import * as conversationDao from "../dao/conversion.dao.js";
 import * as UserDao from "../dao/user.dao.js";
+import * as messageDao from "../dao/message.dao.js"
 import buildSuccessResponse from "../utils/buildSuccessResponse.js";
 import NotFound from "../utils/errors/NotFound.js";
 
@@ -73,3 +74,25 @@ export const getConversations = async (req, res) => {
     conversations,
   });
 };
+
+export const getMessages = async (req,res) => {
+  const userId = req.userId;
+  const conversations = await conversationDao.getConversationByUserId(userId);
+
+  const conversationMessages  = await Promise.all(conversations.map(async (conversation) => {
+    const conversationMessages= await messageDao.getMessagesByConversationId(conversation._id);
+    return {
+      conversationId:conversation._id,
+      messages:conversationMessages
+    }
+  }))
+
+  const messages = conversationMessages.reduce((acc,curr,index,conversationMessages, {}) => {
+    acc[curr.conversationId] = curr.messages;
+    return acc;
+  })
+
+  return buildSuccessResponse(res,"Messages retrieved successfully",{
+    data:messages
+  })
+}
